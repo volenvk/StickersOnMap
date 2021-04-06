@@ -1,0 +1,35 @@
+﻿$datagrid-turnedOffs-color: #fca5a5;
+$datagrid-default-min-width: 1024px;
+
+.request-turned-off {
+  background-color: $datagrid-turnedOffs-color !important;
+  outline-color: $datagrid-turnedOffs-color !important;
+}
+
+:host ::ng-deep {
+  .p-datepicker table th {
+    text-align: end;
+  }
+  
+  .date-filter-body {
+    .date-filter-picker {
+      max-width: 11rem;
+
+      .date-filter-picker--label {
+        width: 1.75rem;
+      }
+    }
+  }
+
+  .p-datatable {
+    min-width: $datagrid-default-min-width;
+  }
+
+  .header-sm {
+    width: 7rem;
+  }
+
+  .header-md {
+    width: 12rem;
+  }
+}

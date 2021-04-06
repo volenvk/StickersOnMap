@@ -1,0 +1,164 @@
+$datagrid-filters-block-height: 1.66rem;
+$invalid-color: #c53030;
+$scale: 13px; // base for components size calculations; defaults to 16px
+
+html {
+  font-size: $scale;
+}
+
+body {
+  font-family: BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  margin: 0;
+}
+
+.c-pointer {
+  cursor: pointer;
+}
+
+.c-not-allowed {
+  cursor: not-allowed;
+}
+
+.d-flex {
+  display: flex;
+}
+
+.flex-wrap {
+  flex-wrap: wrap;
+}
+
+.flex-row {
+  flex-direction: row;
+}
+
+.flex-column {
+  flex-direction: column;
+}
+
+.justify-content-between {
+  justify-content: space-between;
+}
+
+.justify-content-center {
+  justify-content: center;
+}
+
+.justify-content-end {
+  justify-content: flex-end;
+}
+
+.align-self-center {
+  align-self: center;
+}
+
+.v-hidden {
+  visibility: hidden;
+}
+
+.c-invalid {
+  color: $invalid-color;
+}
+
+.text-align-right {
+  text-align: right;
+}
+
+.text-align-center {
+  text-align: center;
+}
+
+.fs-italic {
+  font-style: italic;
+}
+
+.bg-hover-gray:hover {
+  background-color: #e7e7e7 !important;
+}
+
+input::-ms-clear {
+  display: none;
+}
+
+.clickable:hover {
+  cursor: pointer;
+}
+
+.table-filters-header {
+  height: $datagrid-filters-block-height;
+}
+
+form textarea {
+  resize: none !important;
+}
+
+.required::after {
+  content: '*';
+  color: #ff8080;
+}
+
+.floating-button > span {
+  font-size: 2rem;
+}
+
+.p-datatable-auto-layout > .p-datatable-wrapper {
+  overflow-x: visible !important;
+}
+
+.p-datatable-thead {
+input, .p-column-filter {
+  max-width: 100%;
+}
+}
+
+.p-calendar .p-datepicker {
+  min-width: 21rem !important;
+}
+
+.p-datepicker-month, .p-datepicker-year {
+  padding: 0.4rem;
+  border-radius: 5px;
+  border-color: #ced4da;
+}
+
+.p-col-12 {
+  align-self: center;
+}
+
+input.ng-invalid.ng-touched {
+  border-color: $invalid-color;
+}
+
+p-dropdown.ng-touched.ng-invalid {
+.p-dropdown {
+  border-color: $invalid-color;
+}
+}
+
+p-inputmask.ng-dirty.ng-invalid > .p-inputtext,
+p-calendar.ng-touched.ng-invalid,
+p-autocomplete.ng-touched.ng-invalid,
+app-input-date.ng-touched.ng-invalid,
+app-input-time.ng-touched.ng-invalid {
+input {
+  border-color: $invalid-color !important;
+}
+}
+
+.w-full {
+  width: 100%;
+}
+
+.p-disabled, .p-component:disabled {
+  opacity: 1 !important;
+}
+
+ul {
+.p-disabled, .p-component:disabled {
+  opacity: 0.6 !important;
+}
+}
+
+.p-button:disabled {
+  cursor: not-allowed !important;
+  opacity: 0.4 !important;
+}

@@ -1,0 +1,20 @@
+<header>
+  <div class="layout-topbar">
+    <a [routerLink]="['/']" class="logo d-flex">
+      <img src="assets/logo.png" alt="logo-image">
+      <span class="title align-self-center p-ml-1">{{ title | uppercase }}</span>
+    </a>
+
+    <ul class="topbar-menu">
+      <li>
+        <a (click)="menu.toggle($event)">Меню</a>
+      </li>
+    </ul>
+  </div>
+</header>
+
+<p-menu #menu [popup]="true" [model]="references"></p-menu>
+
+<div class="layout-content">
+  <router-outlet></router-outlet>
+</div>

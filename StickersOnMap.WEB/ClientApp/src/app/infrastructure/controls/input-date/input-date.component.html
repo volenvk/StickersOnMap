@@ -1,0 +1,10 @@
+<div class="p-inputgroup">
+  <p-inputMask class="w-full" [mask]="mask" [placeholder]="placeholder" [(ngModel)]="maskedInputValue"
+               [disabled]="disabled || readonly" (onBlur)="onBlur()" (onFocus)="onFocus()"></p-inputMask>
+  <p-calendar #dateCalendar [(ngModel)]="calendarValue"
+              [monthNavigator]="monthSelector" [yearNavigator]="yearSelector" [yearRange]="yearRange" [appendTo]="appendTo"
+              [maxDate]="maxDate" [minDate]="minDate" tabindex="-1" [showTime]="showTime" showButtonBar="true"
+              (onSelect)="onSelect($event)" (onShow)="onCalendarOpen()" [readonlyInput]="true"></p-calendar>
+  <button type="button" pButton class="p-button-outlined" [disabled]="disabled || readonly"
+          (click)="dateCalendar.toggle()" icon="pi pi-calendar" tabindex="-1"></button>
+</div>

@@ -1,0 +1,144 @@
+<p-messages [(value)]="messages" [enableService]="false"></p-messages>
+<p-toast position="top-right"></p-toast>
+<div class="p-mt-2 p-mb-2 table-filters-header">
+  <span *ngFor="let filter of allTableFilters">
+    <app-active-filter-button
+      class="p-ml-2"
+      *ngIf="filter.active"
+      (click)="removeFilter(filter.property)"
+      [displayName]="filter.name"></app-active-filter-button>
+  </span>
+</div>
+
+<p-table #dt [value]="items" [lazy]="true" (onLazyLoad)="loadData($event)"
+         [paginator]="true" [rows]="10" [totalRecords]="totalItemsCount" [loading]="loading"
+         [showCurrentPageReport]="true" [rowsPerPageOptions]="[10,25,50]"
+         currentPageReportTemplate="Записи с {first} по {last} из {totalRecords}"
+         styleClass="p-datatable-sm p-datatable-gridlines"
+         stateStorage="local" stateKey="table-vehicle"
+         [resetPageOnSort]="false"
+>
+  <ng-template pTemplate="caption">
+    <div class="d-flex">
+      <span class="align-self-center p-mr-6">Стикеры</span>
+      <p-multiSelect [options]="cols" [(ngModel)]="selectedColumns" optionLabel="header"
+                     selectedItemsLabel="Показано {0} столбцов" [style]="{minWidth: '200px'}"
+                     placeholder="Выберите столбцы" [showToggleAll]="true"
+                     emptyFilterMessage="Столбцы не найдены"></p-multiSelect>
+    </div>
+  </ng-template>
+  <ng-template pTemplate="header">
+    <!-- Заголовки -->
+    <tr>
+      <!-- Наименование -->
+      <th class="header-sm" [pSortableColumn]="columnDefs.name.property" *ngIf="columnDefs.name.visible">
+        {{columnDefs.name.name}}
+        <p-sortIcon [field]="columnDefs.name.property"></p-sortIcon>
+      </th>
+      <!-- Дата и время -->
+      <th class="header-md" [pSortableColumn]="columnDefs.createdOn.property" *ngIf="columnDefs.createdOn.visible">
+        {{columnDefs.createdOn.name}}
+        <p-sortIcon [field]="columnDefs.createdOn.property"></p-sortIcon>
+      </th>
+      <!-- Отображать -->
+      <th class="header-sm" [pSortableColumn]="columnDefs.active.property" *ngIf="columnDefs.active.visible">
+        {{columnDefs.active.name}}
+        <p-sortIcon [field]="columnDefs.active.property"></p-sortIcon>
+      </th>
+      <th class="header-sm">Действия</th>
+    </tr>
+
+    <!-- Фильтры -->
+    <tr>
+      <!-- Наименование -->
+      <th *ngIf="columnDefs.name.visible">
+        <input pInputText type="text" placeholder="Поиск" appNonNegativeIntegers
+               (input)="dt.filter($event.target.value, columnDefs.name.property, 'contains')"
+               [(ngModel)]="activeTableFilters[columnDefs.name.property]">
+      </th>
+      <!-- Дата и время последнего местонахождения -->
+      <th *ngIf="columnDefs.createdOn.visible">
+        <div class="d-flex flex-wrap date-filter-body">
+          <div class="d-flex justify-content-between p-mt-1 date-filter-picker">
+            <label for="startDate" class="align-self-center date-filter-picker--label">С</label>
+            <app-input-date id="startDate" [monthSelector]="true" [yearSelector]="true"
+                            [minDate]="minDate" [maxDate]="maxDate" placeholder="ДД.ММ.ГГГГ"
+                            [(ngModel)]="createdOnFilterStartDate" class="w-full"
+                            (onChange)="filterByCreatedOn($event, 'gte')"></app-input-date>
+          </div>
+          <div class="d-flex justify-content-between p-mt-1 date-filter-picker">
+            <label for="endDate" class="align-self-center date-filter-picker--label">По</label>
+            <app-input-date id="endDate" [monthSelector]="true" [yearSelector]="true"
+                            [minDate]="minDate" [maxDate]="maxDate" placeholder="ДД.ММ.ГГГГ"
+                            [(ngModel)]="createdOnFilterEndDate" class="w-full"
+                            (onChange)="filterByCreatedOn($event, 'lte')"></app-input-date>
+          </div>
+        </div>
+      </th>
+
+      <!-- Отображать -->
+      <th *ngIf="columnDefs.active.visible">
+        <p-dropdown [options]="yesNoAllSelectItems" styleClass="p-column-filter"
+                    (onChange)="dt.filter($event.value, columnDefs.active.property, 'equal')"
+                    [(ngModel)]="activeTableFilters[columnDefs.active.property]"
+        ></p-dropdown>
+      </th>
+      <th></th>
+    </tr>
+  </ng-template>
+
+  <ng-template pTemplate="body" let-stickers>
+    <tr class="bg-hover-gray">
+      <td *ngIf="columnDefs.name.visible">{{ stickers.name }}</td>
+      <td *ngIf="columnDefs.createdOn.visible">{{ stickers.createdOn | date:'medium' }}</td>
+      <td>
+        <tt *ngIf="stickers.active">Да</tt>
+        <tt *ngIf="!stickers.active">Нет</tt>
+      </td>
+      <td>
+        <button type="button" pButton icon="pi pi-pencil"
+                class="p-button-outlined p-mr-2 p-button-sm" (click)="onEdit(stickers.id)"></button>
+        <button type="button" pButton icon="pi pi-trash"
+                class="p-button-outlined p-button-danger p-button-sm" (click)="onDelete(stickers.id)"
+        ></button>
+      </td>
+    </tr>
+  </ng-template>
+
+  <ng-template pTemplate="emptymessage">
+    <tr>
+      <td [colSpan]="columnsCount">Записи не найдены</td>
+    </tr>
+  </ng-template>
+</p-table>
+
+<form [formGroup]="form">
+  <p-dialog [(visible)]="displayDeleteDialog" [style]="{width: '550px'}" header="Стикеры" [modal]="true" styleClass="p-fluid">
+    <ng-template pTemplate="content">
+      <div>
+        <label for="name" class='{{readonly ? "" : "required"}}'>Наименование</label>
+        <input id="name" [readOnly]="readonly" type="text" pInputText formControlName="name" autocomplete="off">
+        <small id="name-error" class="c-invalid"
+               [ngClass]="{'v-hidden': readonly || !form.get('name').touched || !form.get('name').errors}">
+          Укажите название стикера
+        </small>
+      </div>
+      <div class="p-mt-2">
+        <p-checkbox id="active" binary="true" formControlName="active"></p-checkbox>
+        <label for="active" class="p-ml-2">Отображать на карте</label>
+      </div>
+    </ng-template>
+
+    <ng-template pTemplate="footer">
+      <button type="button" pButton label="Отмена" class="p-button-text p-button-secondary"
+              icon="pi pi-times" (click)="onCancel()"></button>
+      <button type="submit" pButton label="Сохранить" class="p-button-text"
+              [disabled]="form.invalid" icon="pi pi-check" (click)="onSubmit()"></button>
+    </ng-template>
+  </p-dialog>
+</form>
+
+<p-confirmDialog
+  [closeOnEscape]="false" [closable]="false"
+  header="Удаление" icon="pi pi-exclamation-triangle"
+></p-confirmDialog>

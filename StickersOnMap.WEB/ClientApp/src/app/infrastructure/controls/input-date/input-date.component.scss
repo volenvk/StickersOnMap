@@ -1,0 +1,33 @@
+:host ::ng-deep {
+  p-calendar {
+    width: 0;
+    outline: none;
+
+    .p-calendar {
+      height: 100%;
+    }
+
+    .p-inputtext {
+      width: 0;
+      padding: 0;
+      opacity: 0;
+
+      &:focus {
+        outline: none;
+        box-shadow: none;
+        border-color: transparent;
+      }
+    }
+  }
+
+  p-inputMask {
+    .p-inputtext {
+      height: 100% !important;
+      width: 100% !important;
+      border-top-right-radius: 0;
+      border-bottom-right-radius: 0;
+    }
+  }
+}
+
+
