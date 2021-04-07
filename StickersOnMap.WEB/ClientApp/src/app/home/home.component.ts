@@ -10,7 +10,8 @@ export class HomeComponent {
   title = 'Карта';
 
   references: MenuItem[] = [
-    {label: 'Стикеры', routerLink: '/references/stickers'}
+    {label: 'Стикеры', routerLink: '/references/stickers'},
+    {label: 'API', routerLink: '/references/API'}
   ];
 
   reports: MenuItem[];

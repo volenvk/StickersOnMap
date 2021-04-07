@@ -10,6 +10,7 @@ namespace StickersOnMap.WEB.Controllers
     using Microsoft.AspNetCore.Http;
     using Microsoft.Extensions.Logging;
     using Models;
+    using Newtonsoft.Json;
 
     /// <summary>
     /// Контроллер работы с картой
@@ -20,14 +21,14 @@ namespace StickersOnMap.WEB.Controllers
     public class MapController : ControllerBase
     {
         private readonly ILogger<MapController> _logger;
-        private readonly IGeoDataRepo _geoDataRepo;
+        private readonly IStickerRepo _stickerRepo;
         private readonly IMapper _mapper;
 
         
-        public MapController(IGeoDataRepo geoDataRepo, IMapper mapper, ILogger<MapController> logger)
+        public MapController(IStickerRepo stickerRepo, IMapper mapper, ILogger<MapController> logger)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            _geoDataRepo = geoDataRepo ?? throw new ArgumentNullException(nameof(geoDataRepo));
+            _stickerRepo = stickerRepo ?? throw new ArgumentNullException(nameof(stickerRepo));
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         }
         
@@ -42,10 +43,10 @@ namespace StickersOnMap.WEB.Controllers
         {
             try
             {
-                var activeGeoDatas = _geoDataRepo.GetActive();
+                var activeGeoDatas = _stickerRepo.Where(s=>s.Active);
                 if (activeGeoDatas != null)
                 {
-                    var geoDataDtos = _mapper.Map<IEnumerable<ModelGeoData>, IEnumerable<GeoDataDTO>>(activeGeoDatas);
+                    var geoDataDtos = _mapper.Map<IEnumerable<ModelSticker>, IEnumerable<GeoDataDTO>>(activeGeoDatas);
                     return Ok(geoDataDtos);
                 }
             }
@@ -55,6 +56,64 @@ namespace StickersOnMap.WEB.Controllers
             }
             
             return ErrorResult.NotFound("Ошибка: данные не найдены.");
+        }
+        
+        /// <summary>
+        /// Добавление записи
+        /// </summary>
+        /// <param name="dto">гео-данные</param>
+        /// <returns></returns>
+        [HttpPost("create")]
+        [Produces(typeof(GeoDataDTO))]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status409Conflict)]
+        public ActionResult<int> Create(GeoDataDTO dto)
+        {
+            try
+            {
+                if (ModelState.IsValid)
+                {
+                    if (dto != null)
+                    {
+                        if (_stickerRepo.Any(m => m.Name.Equals(dto.Name, StringComparison.CurrentCultureIgnoreCase)))
+                        {
+                            return ErrorResult.Conflict($"Ошибка: {dto.Name} было добавлено ранее.");
+                        }
+                    
+                        var model = _mapper.Map<ModelSticker>(dto);
+
+                        if (_stickerRepo.Add(model) > 0)
+                        {
+                            _logger.LogInformation($"Создание {typeof(GeoDataDTO).Name}: [{ToJsonString(dto)}]");
+
+                            return Ok(model.Id);
+                        }
+                        
+                        return ErrorResult.BadRequest("Ошибка: данные не удалось добавить.");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+            }
+            
+            return ErrorResult.BadRequest("Ошибка: неверные данные.");
+        }
+        
+        private string ToJsonString(object obj)
+        {
+            try
+            {
+                return JsonConvert.SerializeObject(obj);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+            }
+            
+            return string.Empty;
         }
     }
 }

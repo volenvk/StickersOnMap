@@ -1,12 +1,12 @@
-using System;
-using System.Linq;
-using System.Linq.Expressions;
-using Microsoft.EntityFrameworkCore;
-using NLog;
-
 namespace StickersOnMap.DAL.Repositories
 {
+    using System;
+    using System.Linq;
+    using System.Linq.Expressions;
+    using Microsoft.EntityFrameworkCore;
+    using NLog;
     using Interfaces;
+    using System.Threading.Tasks;
     
     public class UnitOfWork : IUnitOfWork
     {
@@ -34,14 +34,10 @@ namespace StickersOnMap.DAL.Repositories
             }
         }
 
-        public void Dispose()
-        {
-            _context.Dispose();
-        }
+        public void Dispose() => _context.Dispose();
 
-        public int Save()
-        {
-            return _context.SaveChanges();
-        }
+        public int Save() => _context.SaveChanges();
+
+        public Task<int> SaveAsync() => _context.SaveChangesAsync();
     }
 }

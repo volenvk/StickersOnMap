@@ -6,7 +6,7 @@ import {Observable, of} from 'rxjs';
 import {catchError, map} from 'rxjs/operators';
 import * as moment from 'moment';
 import {FormBuilder, FormGroup, Validators} from "@angular/forms";
-import {Stickers} from "../../../infrastructure/models/stickers-model";
+import {Sticker} from "../../../infrastructure/models/stickers-model";
 import {DatagridComponentBaseDirective} from "../../../infrastructure/datagrid-component-base.directive";
 import {HittableColumnDefinition} from "../../../infrastructure/models/column-definition.model";
 import {StickersService} from "../../../services/stickers.service";
@@ -22,26 +22,26 @@ const COLUMN_SIZE_FACTOR_IN_REMS = 10;
   templateUrl: './stickers.component.html',
   styleUrls: ['stickers.component.scss']
 })
-export class StickersComponent extends DatagridComponentBaseDirective<Stickers>
+export class StickersComponent extends DatagridComponentBaseDirective<Sticker>
   implements OnInit {
 
   columnDefs: { [p: string]: HittableColumnDefinition } = {
-    name: {property: 'Name', name: 'Наименование', visible: true},
-    createdOn: {property: 'CreatedOn', name: 'Дата и время добавления', visible: true},
-    active: {property: 'Active', name: 'Отображать на карте', visible: true},
+    name: {property: 'name', name: 'Наименование', visible: true},
+    createDate: {property: 'createDate', name: 'Дата и время добавления', visible: true},
+    active: {property: 'active', name: 'Отображать на карте', visible: true},
   };
 
   cols: any[];
   createdOnStartDate: Date = null;
   createdOnFilterStartDate: Date = null;
-  createdOnFilterStartDateProperty = this.columnDefs.createdOn.property + '_gte';
+  createdOnFilterStartDateProperty = this.columnDefs.createDate.property + '_gte';
   createdOnFilterEndDate: Date = null;
-  createdOnFilterEndDateProperty = this.columnDefs.createdOn.property + '_lte';
+  createdOnFilterEndDateProperty = this.columnDefs.createDate.property + '_lte';
   minDate = moment('1997-01-01').toDate();
   maxDate = moment().endOf('year').toDate();
 
   constructor(
-    protected vehicleWorkService: StickersService,
+    protected stickersService: StickersService,
     protected fb: FormBuilder,
     protected router: Router,
     protected messageService: MessageService,
@@ -49,7 +49,7 @@ export class StickersComponent extends DatagridComponentBaseDirective<Stickers>
     protected cdRef: ChangeDetectorRef,
     title: Title
   ) {
-    super(vehicleWorkService, messageService, confirmationService, cdRef);
+    super(stickersService, messageService, confirmationService, cdRef);
     title.setTitle('Стикеры');
   }
 
@@ -63,18 +63,18 @@ export class StickersComponent extends DatagridComponentBaseDirective<Stickers>
     return this.fb.group({
       id: [0],
       name: [null, [Validators.required, Validators.maxLength(200)]],
-      createdOn: [null],
+      createDate: [null],
       active: [true]
     });
   }
 
-  getFormValue(model: Stickers | null): { [p: string]: any } {
-    this.createdOnStartDate = moment(model?.createdOn)?.toDate() ?? null;
+  getFormValue(model: Sticker | null): { [p: string]: any } {
+    this.createdOnStartDate = moment(model?.createDate)?.toDate() ?? null;
     return {
       id: model?.id ?? 0,
-      name: model?.Name ?? null,
-      createdOn: model?.createdOn ?? null,
-      active: model?.Active ?? true
+      name: model?.name ?? null,
+      createDate: model?.createDate ?? null,
+      active: model?.active ?? true
     };
   }
 
@@ -104,7 +104,7 @@ export class StickersComponent extends DatagridComponentBaseDirective<Stickers>
     service: ServiceBase<T>,
     func: (item: T) => SelectItem
   ): Observable<SelectItem[]> {
-    const request = new RequestBuilder().orderBy('CreatedOn').takePage(1, 10).build();
+    const request = new RequestBuilder().orderBy('createDate').takePage(1, 10).build();
     return service.fetchFiltered(request)
       .pipe(
         map(r => r.data.map(d => func(d))),
@@ -135,7 +135,7 @@ export class StickersComponent extends DatagridComponentBaseDirective<Stickers>
   }
 
   removeFilter(name: string) {
-    const property = this.columnDefs.createdOn.property;
+    const property = this.columnDefs.createDate.property;
 
     if (name === property) {
       this.removeCreatedOnFilter();
@@ -167,14 +167,14 @@ export class StickersComponent extends DatagridComponentBaseDirective<Stickers>
   }
 
   private toSelectItem(
-      item: Stickers,
-      labelSelector: (item: Stickers) => string = (i) => i?.Name,
-      valueSelector: (item: Stickers) => any = (i) => i?.id
+      item: Sticker,
+      labelSelector: (item: Sticker) => string = (i) => i?.name,
+      valueSelector: (item: Sticker) => any = (i) => i?.id
   ): SelectItem {
     return {
       label: labelSelector(item),
       value: valueSelector(item),
-      disabled: !item?.Active
+      disabled: !item?.active
     };
   }
 

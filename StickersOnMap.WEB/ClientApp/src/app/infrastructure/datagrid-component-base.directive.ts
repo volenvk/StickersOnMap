@@ -132,7 +132,7 @@ export abstract class DatagridComponentBaseDirective<T extends Entity> extends C
     this.readonly = false;
     this.toggleDialog();
     const model = this.buildSubmitModel();
-    this.getCreateOrUpdateObservableFor(model).subscribe(
+    this.getUpdateObservableFor(model).subscribe(
         id => {
           this.showSuccessToast('Операция выполнена успешно');
           this.refreshTable();
@@ -159,7 +159,7 @@ export abstract class DatagridComponentBaseDirective<T extends Entity> extends C
   }
 
   onEdit(id: number) {
-    this.readonly = true;
+    this.readonly = false;
     const item = this.items.find(u => u.id === id);
     const value = this.getFormValue(item);
     this.form.setValue(value);
@@ -192,10 +192,8 @@ export abstract class DatagridComponentBaseDirective<T extends Entity> extends C
     this.displayDeleteDialog = !this.displayDeleteDialog;
   }
 
-  getCreateOrUpdateObservableFor(model: T): Observable<number> {
-    return model.id === 0 ?
-        this.fetchService.create(model) :
-        this.fetchService.update(model);
+  getUpdateObservableFor(model: T): Observable<number> {
+    return this.fetchService.update(model);
   }
 
   removeFilter(name: string) {

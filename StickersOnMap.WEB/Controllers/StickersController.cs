@@ -95,78 +95,39 @@ namespace StickersOnMap.WEB.Controllers
             
             return ErrorResult.NotFound("Ошибка: данные не найдены.");
         }
-        
-        /// <summary>
-        /// Добавление записи
-        /// </summary>
-        /// <param name="dto">транспортное средство</param>
-        /// <returns></returns>
-        [HttpPost("create")]
-        [Produces(typeof(StickerDTO))]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status409Conflict)]
-        public ActionResult<int> Create(StickerDTO dto)
-        {
-            try
-            {
-                if (ModelState.IsValid)
-                {
-                    if (dto != null)
-                    {
-                        if (_stickerRepo.Any(m => m.Name.Equals(dto.Name, StringComparison.CurrentCultureIgnoreCase)))
-                            return ErrorResult.Conflict($"Ошибка: {dto.Name} было добавлено ранее.");
-                    
-                        var model = _mapper.Map<ModelSticker>(dto);
 
-                        if (_stickerRepo.Add(model) == 0)
-                            return ErrorResult.BadRequest("Ошибка: данные не удалось добавить.");
-            
-                        var id = model.Id;
-
-                        _logger.LogInformation($"Создание {typeof(StickerDTO).Name}: [{ToString(dto)}]");
-
-                        return Ok(id);   
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex.Message);
-            }
-            
-            return ErrorResult.BadRequest("Ошибка: неверные данные.");
-        }
-        
         /// <summary>
         /// Обновление записи
         /// </summary>
-        /// <param name="id">id записи</param>
-        /// <param name="dto">транспортное средство</param>
+        /// <param name="dto">стикер</param>
         /// <returns></returns>
-        [HttpPut("{id}")]
+        [HttpPut]
         [Produces(typeof(StickerDTO))]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public ActionResult<int> Update(int id, StickerDTO dto)
+        public ActionResult<int> Update(StickerDTO dto)
         {
             try
             {
-                if (!ModelState.IsValid)
-                    return ErrorResult.BadRequest("Ошибка: неверные данные.");
-            
-                if (!_stickerRepo.Any(user=>user.Id == id))
-                    return ErrorResult.BadRequest("Ошибка: неверные данные.");
+                if (ModelState.IsValid && !string.IsNullOrEmpty(dto.Name))
+                {
+                    var model = _stickerRepo.Get(s => s.Id == dto.Id);
 
-                var model = _mapper.Map<ModelSticker>(dto);
-                model.Id = id;
-            
-                if (_stickerRepo.Update(model) == 0)
-                    return ErrorResult.BadRequest("Ошибка: данные не удалось обновить.");
-            
-                _logger.LogInformation($"Обновление данных {typeof(StickerDTO).Name}: [{ToString(dto)}]");
+                    if (model != null)
+                    {
+                        model.Active = dto.Active ?? false;
+                        model.Name = dto.Name;
 
-                return Ok(model.Id);
+                        if (_stickerRepo.Update(model) > 0)
+                        {
+                            _logger.LogInformation($"Обновление данных {typeof(StickerDTO).Name}: [{ToJsonString(dto)}]");
+
+                            return Ok(model.Id);
+                        }
+                    
+                        return ErrorResult.BadRequest("Ошибка: данные не удалось обновить.");
+                    }
+                }
             }
             catch (Exception ex)
             {
@@ -185,17 +146,19 @@ namespace StickersOnMap.WEB.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public IActionResult Delete(int id)
+        public ActionResult<int> Delete(int id)
         {
             try
             {
                 var deletedRow = _stickerRepo.Delete(item=> item.Id == id);
-                if (deletedRow < 1)
-                    return ErrorResult.NotFound("Ошибка: данные не найдены.");
-
-                _logger.LogInformation($"Удаление {typeof(StickerDTO).Name} с id: [{id}]");
+                if (deletedRow > 0)
+                {
+                    _logger.LogInformation($"Удаление {typeof(StickerDTO).Name} с id: [{id}]");
             
-                return Ok();
+                    return Ok(deletedRow);
+                }
+
+                return ErrorResult.NotFound("Ошибка: данные не удалось удалить.");
             }
             catch (Exception ex)
             {
@@ -205,7 +168,7 @@ namespace StickersOnMap.WEB.Controllers
             return ErrorResult.BadRequest("Ошибка: неверные данные.");
         }
         
-        private string ToString(object obj)
+        private string ToJsonString(object obj)
         {
             try
             {

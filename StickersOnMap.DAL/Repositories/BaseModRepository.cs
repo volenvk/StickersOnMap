@@ -10,7 +10,7 @@ namespace StickersOnMap.DAL.Repositories
     using Interfaces;
     using Core.Interfaces;
 
-    public class BaseModRepository<T> : IModRepository<T> where T : class, IEntry
+    public class BaseModRepository<T> : IModRepository<T> where T : class, IEntity
     {
         private readonly ILogger _logger;
         private readonly DbSet<T> _db;

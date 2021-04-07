@@ -36,9 +36,9 @@
         <p-sortIcon [field]="columnDefs.name.property"></p-sortIcon>
       </th>
       <!-- Дата и время -->
-      <th class="header-md" [pSortableColumn]="columnDefs.createdOn.property" *ngIf="columnDefs.createdOn.visible">
-        {{columnDefs.createdOn.name}}
-        <p-sortIcon [field]="columnDefs.createdOn.property"></p-sortIcon>
+      <th class="header-md" [pSortableColumn]="columnDefs.createDate.property" *ngIf="columnDefs.createDate.visible">
+        {{columnDefs.createDate.name}}
+        <p-sortIcon [field]="columnDefs.createDate.property"></p-sortIcon>
       </th>
       <!-- Отображать -->
       <th class="header-sm" [pSortableColumn]="columnDefs.active.property" *ngIf="columnDefs.active.visible">
@@ -57,7 +57,7 @@
                [(ngModel)]="activeTableFilters[columnDefs.name.property]">
       </th>
       <!-- Дата и время последнего местонахождения -->
-      <th *ngIf="columnDefs.createdOn.visible">
+      <th *ngIf="columnDefs.createDate.visible">
         <div class="d-flex flex-wrap date-filter-body">
           <div class="d-flex justify-content-between p-mt-1 date-filter-picker">
             <label for="startDate" class="align-self-center date-filter-picker--label">С</label>
@@ -87,19 +87,19 @@
     </tr>
   </ng-template>
 
-  <ng-template pTemplate="body" let-stickers>
+  <ng-template pTemplate="body" let-sticker>
     <tr class="bg-hover-gray">
-      <td *ngIf="columnDefs.name.visible">{{ stickers.name }}</td>
-      <td *ngIf="columnDefs.createdOn.visible">{{ stickers.createdOn | date:'medium' }}</td>
+      <td *ngIf="columnDefs.name.visible">{{ sticker.name }}</td>
+      <td *ngIf="columnDefs.createDate.visible">{{ sticker.createDate | date:'medium' }}</td>
       <td>
-        <tt *ngIf="stickers.active">Да</tt>
-        <tt *ngIf="!stickers.active">Нет</tt>
+        <tt *ngIf="sticker.active">Да</tt>
+        <tt *ngIf="!sticker.active">Нет</tt>
       </td>
       <td>
         <button type="button" pButton icon="pi pi-pencil"
-                class="p-button-outlined p-mr-2 p-button-sm" (click)="onEdit(stickers.id)"></button>
+                class="p-button-outlined p-mr-2 p-button-sm" (click)="onEdit(sticker.id)"></button>
         <button type="button" pButton icon="pi pi-trash"
-                class="p-button-outlined p-button-danger p-button-sm" (click)="onDelete(stickers.id)"
+                class="p-button-outlined p-button-danger p-button-sm" (click)="onDelete(sticker.id)"
         ></button>
       </td>
     </tr>
@@ -116,8 +116,8 @@
   <p-dialog [(visible)]="displayDeleteDialog" [style]="{width: '550px'}" header="Стикеры" [modal]="true" styleClass="p-fluid">
     <ng-template pTemplate="content">
       <div>
-        <label for="name" class='{{readonly ? "" : "required"}}'>Наименование</label>
-        <input id="name" [readOnly]="readonly" type="text" pInputText formControlName="name" autocomplete="off">
+        <label for="name" class="{{!form.get('name').touched || !form.get('name').errors ? '' : 'required'}}">Наименование</label>
+        <input id="name" type="text" pInputText formControlName="name" autocomplete="off">
         <small id="name-error" class="c-invalid"
                [ngClass]="{'v-hidden': readonly || !form.get('name').touched || !form.get('name').errors}">
           Укажите название стикера

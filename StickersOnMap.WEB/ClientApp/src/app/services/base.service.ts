@@ -42,10 +42,10 @@ export abstract class ServiceBase<T extends Entity> {
   }
 
   update<TModel extends Entity = T>(item: TModel): Observable<number> {
-    return this.httpClient.put<number>(`${this.url}/${item.id}`, item);
+    return this.httpClient.put<number>(this.url, item);
   }
 
-  delete(id: number): Observable<void> {
-    return this.httpClient.delete<void>(`${this.url}/${id}`);
+  delete(id: number): Observable<number> {
+    return this.httpClient.delete<number>(`${this.url}/${id}`);
   }
 }

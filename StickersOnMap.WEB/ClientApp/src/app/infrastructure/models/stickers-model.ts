@@ -1,11 +1,11 @@
 import {Entity} from "./entity.model";
 
-export class Stickers implements Entity {
+export class Sticker implements Entity {
   constructor(
     public id: number,
-    public Name: string,
-    public Active: boolean,
-    public createdOn: string
+    public name: string,
+    public active: boolean,
+    public createDate: string
   ) {
   }
 }

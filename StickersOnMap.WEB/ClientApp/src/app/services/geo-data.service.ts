@@ -16,4 +16,12 @@ export class GeoDataService {
   fetchAll(): Observable<GeoData[]> {
     return this.httpClient.get<GeoData[]>(`${urls.geoData}/`);
   }
+
+  create(item: GeoData): Observable<number> {
+    return this.httpClient.post<number>(`${urls.geoData}/create`, item);
+  }
+
+  delete(id: number): Observable<void> {
+    return this.httpClient.delete<void>(`${urls.geoData}/${id}`);
+  }
 }

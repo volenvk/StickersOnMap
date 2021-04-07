@@ -13,9 +13,10 @@ namespace StickersOnMap.WEB.Infrastructure.MappingProfiles
                 .ForMember(d => d.Id, o => o.Ignore())
                 .ForMember(d => d.CreateDate, o => o.Ignore());
             
-            CreateMap<ModelGeoData, GeoDataDTO>();
-            CreateMap<GeoDataDTO, ModelGeoData>()
+            CreateMap<ModelSticker, GeoDataDTO>();
+            CreateMap<GeoDataDTO, ModelSticker>()
                 .ForMember(d => d.Id, o => o.Ignore())
+                .ForMember(d => d.Active, o => o.MapFrom(t=> true))
                 .ForMember(d => d.CreateDate, o => o.Ignore());
         }
     }

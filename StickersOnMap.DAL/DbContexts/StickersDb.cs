@@ -9,7 +9,5 @@ namespace StickersOnMap.DAL.DbContexts
         public StickersDb(DbContextOptions<StickersDb> options) : base(options) { }
         
         public DbSet<ModelSticker> Stickers { get; }
-
-        public DbSet<ModelGeoData> GeoDatas { get; }
     }
 }

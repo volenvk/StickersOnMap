@@ -92,7 +92,6 @@ namespace StickersOnMap.WEB
             });
 
             services.AddScoped<IStickerRepo, StickerRepo>();
-            services.AddScoped<IGeoDataRepo, GeoDataRepo>();
         }
         
         private void ConfigLogging(IServiceCollection services)

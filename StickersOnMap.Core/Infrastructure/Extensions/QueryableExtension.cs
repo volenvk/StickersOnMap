@@ -4,6 +4,7 @@ namespace StickersOnMap.Core.Infrastructure.Extensions
     using System.Collections.Generic;
     using System.Linq;
     using System.Linq.Dynamic.Core;
+    using System.Reflection;
     using Filteres;
     using Pages;
     using Interfaces;
@@ -20,7 +21,7 @@ namespace StickersOnMap.Core.Infrastructure.Extensions
             if (string.IsNullOrEmpty(propertyName))
                 throw new ArgumentNullException($"property null or empty on object {typeof(T).Name}");
             
-            var propertyInfo = typeof(T).GetProperty(propertyName);
+            var propertyInfo = typeof(T).GetProperty(propertyName, BindingFlags.IgnoreCase);
 
             if (propertyInfo == null)
                 throw new ArgumentException($"property {propertyName} not found on object {typeof(T).Name}");

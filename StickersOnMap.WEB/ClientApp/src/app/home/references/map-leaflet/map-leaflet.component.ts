@@ -1,5 +1,5 @@
-import {AfterViewInit, ChangeDetectorRef, Component, EventEmitter, Inject, Input, Output} from '@angular/core';
-import {icon, LatLng, latLng, LatLngBoundsExpression, Layer, Map, marker, Rectangle, rectangle, tileLayer} from 'leaflet';
+import {AfterViewInit, ChangeDetectorRef, Component, EventEmitter, Input, Output} from '@angular/core';
+import {icon, LatLng, latLng, LatLngBoundsExpression, Layer, Map, marker, tileLayer} from 'leaflet';
 import {ConfirmationService, MessageService} from "primeng/api";
 import {Title} from "@angular/platform-browser";
 import {GeoDataService} from "../../../services/geo-data.service";
@@ -16,7 +16,7 @@ import {GeoData} from "../../../infrastructure/models/geo-data.model";
 export class MapLeafletComponent implements AfterViewInit {
 
   constructor(
-      private vehicleGeoDataService: GeoDataService,
+      private geoDataService: GeoDataService,
       private settingsService: SettingsService,
       protected messageService: MessageService,
       protected confirmationService: ConfirmationService,
@@ -58,7 +58,7 @@ export class MapLeafletComponent implements AfterViewInit {
   }
 
   private subscribeData() : void {
-    this.vehicleGeoDataService.fetchAll().subscribe((data: GeoData[]) => {
+    this.geoDataService.fetchAll().subscribe((data: GeoData[]) => {
       this.mergeMarker(data);
     });
   }
@@ -66,7 +66,7 @@ export class MapLeafletComponent implements AfterViewInit {
   private mergeMarker(geoData: GeoData[]) : void {
     if (geoData) {
       geoData.forEach(geoData => {
-        this.addMarkerAt(geoData.Name, geoData.Latitude, geoData.Longitude);
+        this.addMarkerAt(geoData.name, geoData.latitude, geoData.longitude);
       })}
     }
 
@@ -75,7 +75,8 @@ export class MapLeafletComponent implements AfterViewInit {
   }
 
   private addMarkerAt(title: string, lat: number, lon: number): Layer {
-    const layer = this.createLayerWithMarkerAt(title, lat, lon);
+    const layer = this.createLayerWithMarkerAt(lat, lon);
+    layer.bindPopup(title);
     this.activeLayers.push(layer);
     this.map.addLayer(layer);
     this.map.setView(latLng(lat, lon), this.map.getZoom());
@@ -94,21 +95,23 @@ export class MapLeafletComponent implements AfterViewInit {
   onMapClick(event): void {
     const lat = event.latlng.lat;
     const lon = event.latlng.lng;
-    this.addMarkerAt("here", lat, lon);
+    const name = `широта:${lat.toFixed(3)}, долгота:${lon.toFixed(3)}`;
+    this.addMarkerAt(name, lat, lon);
     this.point.emit({lat, lon});
+    this.geoDataService.create(new GeoData(name, lat, lon)).subscribe();
   }
 
-  private createLayerWithMarkerAt(title: string, lat: number, lon: number, xSize: number = 25, ySize: number = 41): Layer {
+  private createLayerWithMarkerAt(lat: number, lon: number, xSize: number = 25, ySize: number = 41): Layer {
     return marker([lat, lon],
       {
-        title: title,
+        title: '',
         icon: icon({
           iconSize: [xSize, ySize],
           iconAnchor: [xSize / 2, ySize],
           popupAnchor: [1, -34],
           shadowSize: [xSize, ySize],
-          iconUrl: this.baseHref + `assets/truck.png`,
-          shadowUrl: this.baseHref + 'assets/marker-shadow.png'
+          iconUrl: this.baseHref + `assets/truck.png`
+          //shadowUrl: this.baseHref + 'assets/truck-shadow.png'
         })
       });
   }

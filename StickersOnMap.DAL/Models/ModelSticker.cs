@@ -2,19 +2,31 @@ using System;
 
 namespace StickersOnMap.DAL.Models
 {
+    using System.ComponentModel.DataAnnotations;
     using System.ComponentModel.DataAnnotations.Schema;
     using System.Diagnostics.CodeAnalysis;
     using Core.Interfaces;
     
-    public class ModelSticker : IEntry
+    public class ModelSticker : IEntity
     {
-        [ForeignKey("ID")]
+        [ForeignKey("Id")]
         public int Id { get; set; }
         /// <summary>
         /// Наименование
         /// </summary>
         [Column("Name"), NotNull]
+        [MaxLength(200, ErrorMessage = "Не должно превышать 200 символов")]
         public string Name { get; set; }
+        /// <summary>
+        /// Широта
+        /// </summary>
+        [Column("Latitude"), NotNull]
+        public float Latitude { get; set; }
+        /// <summary>
+        /// Долгота
+        /// </summary>
+        [Column("Longitude"), NotNull]
+        public float Longitude { get; set; }
         /// <summary>
         /// Отображение на карте
         /// </summary>
