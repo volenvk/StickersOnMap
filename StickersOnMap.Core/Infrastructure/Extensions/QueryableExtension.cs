@@ -21,7 +21,7 @@ namespace StickersOnMap.Core.Infrastructure.Extensions
             if (string.IsNullOrEmpty(propertyName))
                 throw new ArgumentNullException($"property null or empty on object {typeof(T).Name}");
             
-            var propertyInfo = typeof(T).GetProperty(propertyName, BindingFlags.IgnoreCase);
+            var propertyInfo = typeof(T).GetProperty(propertyName, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance);
 
             if (propertyInfo == null)
                 throw new ArgumentException($"property {propertyName} not found on object {typeof(T).Name}");
@@ -53,7 +53,7 @@ namespace StickersOnMap.Core.Infrastructure.Extensions
             if (string.IsNullOrEmpty(propertyName))
                 throw new ArgumentNullException($"property null or empty on object {typeof(T).Name}");
             
-            var propertyInfo = typeof(T).GetProperty(propertyName);
+            var propertyInfo = typeof(T).GetProperty(propertyName, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance);
 
             if (propertyInfo == null)
                 throw new ArgumentException($"property {propertyName} not found on object {typeof(T).Name}");
