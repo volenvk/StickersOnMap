@@ -94,7 +94,7 @@ namespace StickersOnMap.Core.Infrastructure.Extensions
 
             var ordering = reverse ? "ASC" : "DESC";
             
-            return src.OrderBy(propertyInfo.Name, ordering);
+            return src.OrderBy($"{propertyInfo.Name} {ordering}");
         }
         
         private static IQueryable<T> TakePage<T>(this IQueryable<T> src, int pageNumber, int pageSize)
