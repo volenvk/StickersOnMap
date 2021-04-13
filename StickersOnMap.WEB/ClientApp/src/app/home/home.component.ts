@@ -1,5 +1,6 @@
 import {ChangeDetectorRef, Component, ViewChild} from '@angular/core';
 import {MenuItem} from "primeng/api";
+import {environment} from "../../environments/environment";
 
 @Component({
   selector: 'app-home',
@@ -9,16 +10,7 @@ import {MenuItem} from "primeng/api";
 export class HomeComponent {
   title = 'Карта';
 
-  references: MenuItem[] = [
-    {label: 'Стикеры', routerLink: '/references/stickers'},
-    {label: 'API', routerLink: '/references/API'}
-  ];
-
-  reports: MenuItem[];
-
-  _linksSortFunc = (left: MenuItem, right: MenuItem): number => {
-    return left.label < right.label ? -1 : 1;
-  }
+  references: MenuItem[] = this.CreateMenuItem();
 
   constructor(
       private cdRef: ChangeDetectorRef,
@@ -27,5 +19,15 @@ export class HomeComponent {
 
   ngAfterViewInit(): void {
     this.cdRef.detectChanges();
+  }
+
+
+  private CreateMenuItem(): MenuItem[] {
+    const menu = [];
+    menu.push({label: 'Стикеры', routerLink: '/references/stickers'});
+    if (!environment.production) {
+      menu.push({label: 'API', routerLink: '/references/API'});
+    }
+    return menu;
   }
 }

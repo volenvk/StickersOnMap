@@ -45,7 +45,7 @@ namespace StickersOnMap.WEB
                 configuration.RootPath = "ClientApp/dist";
             });
 
-            services.AddScoped<IAppSettings, AppSettings>();
+            services.AddSingleton<IAppSettings, AppSettings>();
             HealthChecks(services);
             ConfigureDb(services);
             ConfigLogging(services);
@@ -127,7 +127,6 @@ namespace StickersOnMap.WEB
             }
             else
             {
-                //app.ConfigureExceptionHandler();
                 app.UseHsts();
             }
 
