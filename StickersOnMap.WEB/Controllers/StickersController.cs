@@ -1,36 +1,34 @@
+using System;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 
 namespace StickersOnMap.WEB.Controllers
 {
-    using System;
-    using System.Linq;
-    using AutoMapper;
-    using AutoMapper.QueryableExtensions;
     using Core.Infrastructure;
-    using Core.Infrastructure.Extensions;
     using Core.Infrastructure.Filteres;
     using Core.Infrastructure.Pages;
     using DAL.Interfaces;
-    using DAL.Models;
-    using Microsoft.AspNetCore.Http;
-    using Microsoft.Extensions.Logging;
     using Models;
-    using Newtonsoft.Json;
 
+
+    /// <summary>
+    /// Контроллер работы с таблицей стикеров
+    /// </summary>
     [ApiController]
     [Produces("application/json")]
     [Route("api/[controller]")]
     public class StickersController : ControllerBase
     {
+        private readonly IStickerRepoFacade _stickerRepoFacade;
         private readonly ILogger<StickersController> _logger;
-        private readonly IStickerRepo _stickerRepo;
-        private readonly IMapper _mapper;
-        
-        public StickersController(IStickerRepo stickerRepo, IMapper mapper, ILogger<StickersController> logger)
+
+        /// <inheritdoc />
+        public StickersController(IStickerRepoFacade stickerRepoFacade, ILogger<StickersController> logger)
         {
+            _stickerRepoFacade = stickerRepoFacade ?? throw new ArgumentNullException(nameof(stickerRepoFacade));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            _stickerRepo = stickerRepo ?? throw new ArgumentNullException(nameof(stickerRepo));
-            _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         }
         
         /// <summary>
@@ -46,20 +44,10 @@ namespace StickersOnMap.WEB.Controllers
         {
             try
             {
-                var query = _stickerRepo.All().FilterBy(request.Filters);
-                
-                var ids = query
-                    .OrderByEntity(string.IsNullOrEmpty(request.Sort?.Property) ? null : request.Sort)
-                    .TakePage(request.Page?.PageSize == 0 ? null : request.Page)
-                    .Select(r => r.Id)
-                    .ToHashSet();
-
-                var pagedList = _stickerRepo.Where(r => ids.Contains(r.Id))
-                    .OrderByEntity(string.IsNullOrEmpty(request.Sort?.Property) ? null : request.Sort)
-                    .ProjectTo<StickerDTO>(_mapper.ConfigurationProvider)
-                    .AsPagedList(ids.Count);
-
-                return pagedList;
+                if (request != null)
+                {
+                    return _stickerRepoFacade.GetPages<StickerDTO>(request);
+                }
             }
             catch (Exception ex)
             {
@@ -81,7 +69,7 @@ namespace StickersOnMap.WEB.Controllers
         {
             try
             {
-                var model = _stickerRepo.Get(t=>t.Id == id);
+                var model = _stickerRepoFacade.GetFirstOrDefault(t=>t.Id == id);
 
                 if (model == null)
                     return ErrorResult.NotFound("Ошибка: данные не найдены.");
@@ -111,18 +99,17 @@ namespace StickersOnMap.WEB.Controllers
             {
                 if (ModelState.IsValid && !string.IsNullOrEmpty(dto.Name))
                 {
-                    var model = _stickerRepo.Get(s => s.Id == dto.Id);
-
+                    var model = _stickerRepoFacade.GetFirstOrDefault(s => s.Id == dto.Id);
                     if (model != null)
                     {
-                        model.Active = dto.Active ?? false;
+                        model.Active = dto.Active ?? model.Active;
                         model.Name = dto.Name;
 
-                        if (_stickerRepo.Update(model) > 0)
+                        if (_stickerRepoFacade.Update(model) > 0)
                         {
                             _logger.LogInformation($"Обновление данных {typeof(StickerDTO).Name}: [{ToJsonString(dto)}]");
 
-                            return Ok(model.Id);
+                            return Ok(dto.Id);
                         }
                     
                         return ErrorResult.BadRequest("Ошибка: данные не удалось обновить.");
@@ -136,7 +123,7 @@ namespace StickersOnMap.WEB.Controllers
             
             return ErrorResult.BadRequest("Ошибка: неверные данные.");
         }
-        
+
         /// <summary>
         /// Удаление записи
         /// </summary>
@@ -150,7 +137,7 @@ namespace StickersOnMap.WEB.Controllers
         {
             try
             {
-                var deletedRow = _stickerRepo.Delete(item=> item.Id == id);
+                var deletedRow = _stickerRepoFacade.Delete(item=> item.Id == id);
                 if (deletedRow > 0)
                 {
                     _logger.LogInformation($"Удаление {typeof(StickerDTO).Name} с id: [{id}]");
@@ -167,7 +154,7 @@ namespace StickersOnMap.WEB.Controllers
             
             return ErrorResult.BadRequest("Ошибка: неверные данные.");
         }
-        
+
         private string ToJsonString(object obj)
         {
             try

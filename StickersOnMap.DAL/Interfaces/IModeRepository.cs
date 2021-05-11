@@ -6,7 +6,7 @@ namespace StickersOnMap.DAL.Interfaces
 {
     using Core.Interfaces;
     
-    public interface IModRepository<T> where T : class, IEntity
+    public interface IModeRepository<T> where T : class, IEntity
     {
         int Add(T model);
         int AddRange(IEnumerable<T> source);

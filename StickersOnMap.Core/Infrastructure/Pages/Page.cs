@@ -9,5 +9,10 @@ namespace StickersOnMap.Core.Infrastructure.Pages
 
         [JsonProperty("current")]
         public int PageNumber { get; set; }
+
+        public override string ToString()
+        {
+            return $"PageSize: {PageSize}, PageNumber: {PageNumber}";
+        }
     }
 }

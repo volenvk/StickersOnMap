@@ -1,37 +1,35 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Linq.Expressions;
-using Microsoft.EntityFrameworkCore;
 using NLog;
 
 namespace StickersOnMap.DAL.Repositories
 {
+    using System.Linq;
     using Interfaces;
     using Core.Interfaces;
-
-    public class BaseModRepository<T> : IModRepository<T> where T : class, IEntity
+    
+    public class ModeRepository<T> : IModeRepository<T> where T : class, IEntity
     {
         private readonly ILogger _logger;
-        private readonly DbSet<T> _db;
-        private readonly IUnitOfWork _uow; 
+        private readonly IUnitOfWork _uow;
 
-        public BaseModRepository(IUnitOfWork uow)
+        public ModeRepository(IRepositoryConfig config)
         {
+            _ = config ?? throw new ArgumentNullException(nameof(config));
             _logger = LogManager.GetCurrentClassLogger();
-            _uow = uow;
-            _db = uow.GetTable<T>();
+            _uow = config.CreateSingletonUnitOfWork();
         }
         
         public int Add(T model)
         {
             if (model == null)
-                return 0;
+                throw new ArgumentNullException(nameof(model));
 
             try
             {
                 model.CreateDate = DateTime.Now;
-                _db.Add(model);
+                _uow.Insert(model);
                 return _uow.Save();
             }
             catch (Exception ex)
@@ -43,17 +41,17 @@ namespace StickersOnMap.DAL.Repositories
         
         public int AddRange(IEnumerable<T> source)
         {
-            if (source?.Any() != true)
-                return 0;
+            if (source == null)
+                throw new ArgumentNullException(nameof(source));
 
             try
             {
                 foreach (var model in source)
                 {
                     model.CreateDate = DateTime.Now;
+                    _uow.Insert(model);
                 }
-                _db.AddRange(source);
-                
+
                 return _uow.Save();
             }
             catch (Exception ex)
@@ -66,15 +64,15 @@ namespace StickersOnMap.DAL.Repositories
         public int Update(T model)
         {
             if (model == null)
-                return 0;
+                throw new ArgumentNullException(nameof(model));
 
             try
             {
-                if (!_db.Any(dt => dt.Id == model.Id)) 
+                if (!_uow.GetQueryable<T>().Any(dt => dt.Id == model.Id)) 
                     return 0;
                 
                 model.CreateDate = DateTime.Now;
-                _db.Update(model);
+                _uow.Update(model);
                 return _uow.Save();
             }
             catch (Exception ex)
@@ -88,11 +86,11 @@ namespace StickersOnMap.DAL.Repositories
         {
             try
             {
-                var modelDb = _db.AsQueryable().FirstOrDefault(predicate);
-                if (modelDb == null) 
-                    return 0;
+                var model = _uow.GetQueryable<T>().FirstOrDefault(predicate);
+                if (model == null)
+                    throw new ArgumentNullException(nameof(model));
                 
-                _db.Remove(modelDb);
+                _uow.Delete(model);
                 return _uow.Save();
             }
             catch (Exception ex)

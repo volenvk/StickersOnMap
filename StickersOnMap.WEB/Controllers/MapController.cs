@@ -1,16 +1,19 @@
+using System;
+using System.Linq;
+using System.Collections.Generic;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
+using AutoMapper;
+using Newtonsoft.Json;
+
 namespace StickersOnMap.WEB.Controllers
 {
-    using System;
-    using System.Collections.Generic;
-    using Microsoft.AspNetCore.Mvc;
-    using AutoMapper;
     using Core.Infrastructure;
     using DAL.Interfaces;
     using DAL.Models;
-    using Microsoft.AspNetCore.Http;
-    using Microsoft.Extensions.Logging;
     using Models;
-    using Newtonsoft.Json;
+
 
     /// <summary>
     /// Контроллер работы с картой
@@ -21,15 +24,16 @@ namespace StickersOnMap.WEB.Controllers
     public class MapController : ControllerBase
     {
         private readonly ILogger<MapController> _logger;
-        private readonly IStickerRepo _stickerRepo;
+        private readonly IStickerRepoFacade _stickerRepoFacade;
         private readonly IMapper _mapper;
 
-        
-        public MapController(IStickerRepo stickerRepo, IMapper mapper, ILogger<MapController> logger)
+
+        /// <inheritdoc />
+        public MapController(IStickerRepoFacade stickerRepoFacade, IMapper mapper, ILogger<MapController> logger)
         {
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            _stickerRepo = stickerRepo ?? throw new ArgumentNullException(nameof(stickerRepo));
+            _stickerRepoFacade = stickerRepoFacade ?? throw new ArgumentNullException(nameof(stickerRepoFacade));
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
         
         /// <summary>
@@ -43,12 +47,14 @@ namespace StickersOnMap.WEB.Controllers
         {
             try
             {
-                var activeGeoDatas = _stickerRepo.Where(s=>s.Active);
+                var activeGeoDatas = _stickerRepoFacade.Where(s=>s.Active)?.ToList();
+                IEnumerable<GeoDataDTO> geoDataDtos = new GeoDataDTO[0];
                 if (activeGeoDatas != null)
                 {
-                    var geoDataDtos = _mapper.Map<IEnumerable<ModelSticker>, IEnumerable<GeoDataDTO>>(activeGeoDatas);
-                    return Ok(geoDataDtos);
+                    geoDataDtos = _mapper.Map<IEnumerable<ModelSticker>, IEnumerable<GeoDataDTO>>(activeGeoDatas);
                 }
+                
+                return Ok(geoDataDtos);
             }
             catch (Exception ex)
             {
@@ -76,14 +82,14 @@ namespace StickersOnMap.WEB.Controllers
                 {
                     if (dto != null)
                     {
-                        if (_stickerRepo.Any(m => m.Name.Equals(dto.Name, StringComparison.CurrentCultureIgnoreCase)))
+                        if (_stickerRepoFacade.Any(m => m.Name.Equals(dto.Name, StringComparison.CurrentCultureIgnoreCase)))
                         {
                             return ErrorResult.Conflict($"Ошибка: {dto.Name} было добавлено ранее.");
                         }
                     
                         var model = _mapper.Map<ModelSticker>(dto);
 
-                        if (_stickerRepo.Add(model) > 0)
+                        if (_stickerRepoFacade.Add(model) > 0)
                         {
                             _logger.LogInformation($"Создание {typeof(GeoDataDTO).Name}: [{ToJsonString(dto)}]");
 

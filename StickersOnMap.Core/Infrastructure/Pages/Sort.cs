@@ -8,5 +8,10 @@ namespace StickersOnMap.Core.Infrastructure.Pages
         public string Property { get; set; }
 
         public bool Reverse { get; set; }
+
+        public override string ToString()
+        {
+            return $"Property: {Property}, Reverse: {Reverse}";
+        }
     }
 }

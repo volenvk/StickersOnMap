@@ -1,14 +1,14 @@
-namespace StickersOnMap.Core.Infrastructure.Extensions
+namespace StickersOnMap.DAL.Extensions
 {
     using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Linq.Dynamic.Core;
     using System.Reflection;
-    using Filteres;
-    using Pages;
-    using Interfaces;
-    
+    using Core.Infrastructure.Filteres;
+    using Core.Infrastructure.Pages;
+    using Core.Interfaces;
+
     public static class QueryableExtension
     {
         public static IQueryable<T> FilterBy<T>(this IQueryable<T> source, IEnumerable<Filter> filters)
@@ -16,13 +16,32 @@ namespace StickersOnMap.Core.Infrastructure.Extensions
             return filters.Aggregate(source, (current, filter) =>
             {
                 var property = filter.Property;
-                return property.Contains("_") 
-                    ? current.FilterByDate(property, filter.Value) 
+                return property.Contains("_")
+                    ? current.FilterByDate(property, filter.Value)
                     : current.FilterBy(filter.Property, filter.Value);
             });
         }
 
-        public static IQueryable<T> FilterBy<T>(this IQueryable<T> source, string propertyName, string value) {
+        public static IQueryable<T> TakePage<T>(this IQueryable<T> src, Page page)
+        {
+            return page == null ? src : src.TakePage(page.PageNumber, page.PageSize);
+        }
+        
+        public static PagedList<T> AsPagedList<T>(this IQueryable<T> src, int totalCount)
+        {
+            return new PagedList<T>
+            {
+                Data = src.ToList(),
+                TotalCount = totalCount
+            };
+        }
+        
+        public static IQueryable<T> OrderByEntity<T>(this IQueryable<T> src, Sort sort) where T : IEntity
+        {
+            return sort == null ? src : OrderByProp(src, sort.Property, sort.Reverse).ThenBy(e => e.Id);
+        }
+        
+        private static IQueryable<T> FilterBy<T>(this IQueryable<T> source, string propertyName, string value) {
             if (string.IsNullOrEmpty(propertyName))
                 throw new ArgumentNullException($"property null or empty on object {typeof(T).Name}");
 
@@ -32,7 +51,7 @@ namespace StickersOnMap.Core.Infrastructure.Extensions
                 : source.Where($"{info.Name} == (@0)", value);
         }
 
-        public static IQueryable<T> FilterByDate<T>(this IQueryable<T> source, string propertyName, string value) {
+        private static IQueryable<T> FilterByDate<T>(this IQueryable<T> source, string propertyName, string value) {
             if (string.IsNullOrEmpty(propertyName))
                 throw new ArgumentNullException($"property null or empty on object {typeof(T).Name}");
 
@@ -61,25 +80,6 @@ namespace StickersOnMap.Core.Infrastructure.Extensions
                 throw new ArgumentException($"property {propertyName} not found on object {typeof(T).Name}");
 
             return propertyInfo;
-        }
-
-        public static IQueryable<T> TakePage<T>(this IQueryable<T> src, Page page)
-        {
-            return page == null ? src : src.TakePage(page.PageNumber, page.PageSize);
-        }
-        
-        public static PagedList<T> AsPagedList<T>(this IQueryable<T> src, int totalCount)
-        {
-            return new PagedList<T>
-            {
-                Data = src.ToList(),
-                TotalCount = totalCount
-            };
-        }
-        
-        public static IQueryable<T> OrderByEntity<T>(this IQueryable<T> src, Sort sort) where T : IEntity
-        {
-            return sort == null ? src : OrderByProp(src, sort.Property, sort.Reverse).ThenBy(e => e.Id);
         }
         
         private static IOrderedQueryable<T> OrderByProp<T>(IQueryable<T> src, string propertyName, bool reverse = false)

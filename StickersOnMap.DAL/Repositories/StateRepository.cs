@@ -2,60 +2,45 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-using Microsoft.EntityFrameworkCore;
 using NLog;
 
 namespace StickersOnMap.DAL.Repositories
 {
     using Interfaces;
     using Core.Interfaces;
-    
-    public class BaseStateRepository<T> : IStateRepository<T> where T : class, IEntity
+
+    public class StateRepository<T> : IStateRepository<T> where T : class, IEntity
     {
         private readonly ILogger _logger;
-        private readonly DbSet<T> _db;
         private readonly IUnitOfWork _uow; 
 
-        public BaseStateRepository(IUnitOfWork uow)
+        public StateRepository(IRepositoryConfig config)
         {
+            _ = config ?? throw new ArgumentNullException(nameof(config));
             _logger = LogManager.GetCurrentClassLogger();
-            _uow = uow;
-            _db = uow.GetTable<T>();
+            _uow = config.CreateSingletonUnitOfWork();
         }
 
-        public IQueryable<T> All()
+        public T GetFirstOrDefault(Expression<Func<T, bool>> predicate)
         {
             try
             {
-                return _db.AsQueryable();
-            }
-            catch (Exception ex)
-            {
-                _logger.Error(ex, $"[{nameof(All)}] " + ex.Message);
-                return null;
-            }
-        }
-
-        public T Get(Expression<Func<T, bool>> predicate)
-        {
-            try
-            {
-                return _db.AsQueryable().FirstOrDefault(predicate);
+                return _uow.GetQueryable<T>().FirstOrDefault(predicate);
             }
             catch (Exception ex)
             {
                 if (predicate != null)
                     ex.Data.Add("params:", predicate.Body.ToString());
-                _logger.Error(ex, $"[{nameof(Get)}] " + ex.Message);
+                _logger.Error(ex, $"[{nameof(GetFirstOrDefault)}] " + ex.Message);
                 return null;
             }
         }
 
-        public IQueryable<T> Where(Expression<Func<T, bool>> predicate)
+        public IEnumerable<T> Where(Expression<Func<T, bool>> predicate)
         {
             try
             {
-                return _uow.Query(predicate);
+                return _uow.GetQueryable<T>().Where(predicate).ToList();
             }
             catch (Exception ex)
             {
@@ -70,7 +55,7 @@ namespace StickersOnMap.DAL.Repositories
         {
             try
             {
-                return predicate == null ? _db.Any() : _db.Any(predicate);
+                return predicate == null ? _uow.GetQueryable<T>().Any() : _uow.GetQueryable<T>().Any(predicate);
             }
             catch (Exception ex)
             {

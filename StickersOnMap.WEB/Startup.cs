@@ -4,6 +4,7 @@ namespace StickersOnMap.WEB
     using System.IO;
     using System.Reflection;
     using AutoMapper;
+    using Core.Infrastructure;
     using DAL.DbContexts;
     using DAL.Interfaces;
     using DAL.Repositories;
@@ -91,7 +92,7 @@ namespace StickersOnMap.WEB
                 options.EnableSensitiveDataLogging();
             });
 
-            services.AddScoped<IStickerRepo, StickerRepo>();
+            services.AddScoped<IStickerRepoFacade, StickerRepoFacade>();
         }
         
         private void ConfigLogging(IServiceCollection services)
@@ -121,15 +122,8 @@ namespace StickersOnMap.WEB
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            if (env.IsDevelopment())
-            {
-                app.UseDeveloperExceptionPage();
-            }
-            else
-            {
-                app.UseHsts();
-            }
-
+            app.UseHsts();
+            app.UseMiddleware<MiddlewareException>();
             app.UseHttpsRedirection();
             app.UseStaticFiles();
             if (!env.IsDevelopment())
