@@ -8,7 +8,7 @@ namespace StickersOnMap.DAL.Interfaces
     using Core.Infrastructure.Pages;
     using Models;
     
-    public interface IStickerRepoFacade
+    public interface IStickerRepo
     {
         bool Any(Expression<Func<ModelSticker, bool>> predicate = null);
         PagedList<TD> GetPages<TD>(TableFilter filter) where TD : class, new();

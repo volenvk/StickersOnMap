@@ -6,14 +6,16 @@ namespace StickersOnMap.DAL.Repositories
 
     public sealed class RepositoryConfig : IRepositoryConfig
     {
-        private static Lazy<IUnitOfWork> _uowInstance;
+        private readonly DbContext _context;
 
         public RepositoryConfig(DbContext context)
         {
-            _ = context ?? throw new ArgumentNullException(nameof(context));
-            _uowInstance = new Lazy<IUnitOfWork>(() => new UnitOfWork(context));
+            _context = context ?? throw new ArgumentNullException(nameof(context));
         }
 
-        public IUnitOfWork CreateSingletonUnitOfWork() => _uowInstance.Value;
+        public Func<IRepository<T>> GetRepository<T>() where T : class
+        {
+            return () => new Repository<T>(_context);
+        }
     }
 }

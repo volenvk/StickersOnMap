@@ -11,57 +11,57 @@ namespace StickersOnMap.DAL.Repositories
     using Models;
     using Interfaces;
     
-    public class StickerRepoFacade : IStickerRepoFacade
+    public class StickerRepo : IStickerRepo
     {
-        private readonly IRepositoryFactory<ModelSticker> _repositoryFactory;
+        private readonly IRepositoryFactory<ModelSticker> _repositorySticker;
         
-        public StickerRepoFacade(StickersDb context, IMapper mapper)
+        public StickerRepo(StickersDb context, IMapper mapper)
         {
             _ = context ?? throw new ArgumentNullException(nameof(context));
             _ = mapper ?? throw new ArgumentNullException(nameof(mapper));
             var config = new RepositoryConfig(context);
-            _repositoryFactory = new RepositoryFactory<ModelSticker>(config, mapper);
+            _repositorySticker = new RepositoryFactory<ModelSticker>(config, mapper);
         }
 
+        public PagedList<T> GetPages<T>(TableFilter filter) where T : class, new()
+        {
+            var repo = _repositorySticker.CreateLazyFilterRepo();
+            return repo.GetPages<T>(filter);
+        }
+        
         public bool Any(Expression<Func<ModelSticker, bool>> predicate = null)
         {
-            var repo = _repositoryFactory.CreateSingletonStateRepo();
+            var repo = _repositorySticker.CreateLazyStateRepo();
             return repo.Any(predicate);
-        }
-
-        public PagedList<TD> GetPages<TD>(TableFilter filter) where TD : class, new()
-        {
-            var repo = _repositoryFactory.CreateSingletonFilterRepo();
-            return repo.GetPages<TD>(filter);
         }
         
         public IEnumerable<ModelSticker> Where(Expression<Func<ModelSticker, bool>> predicate)
         {
-            var repo = _repositoryFactory.CreateSingletonStateRepo();
+            var repo = _repositorySticker.CreateLazyStateRepo();
             return repo.Where(predicate);
         }
 
         public ModelSticker GetFirstOrDefault(Expression<Func<ModelSticker, bool>> predicate)
         {
-            var repo = _repositoryFactory.CreateSingletonStateRepo();
+            var repo = _repositorySticker.CreateLazyStateRepo();
             return repo.GetFirstOrDefault(predicate);
         }
 
         public int Add(ModelSticker model)
         {
-            var repo = _repositoryFactory.CreateSingletonModeRepo();
+            var repo = _repositorySticker.CreateLazyModeRepo();
             return repo.Add(model);
         }
         
         public int Update(ModelSticker model)
         {
-            var repo = _repositoryFactory.CreateSingletonModeRepo();
+            var repo = _repositorySticker.CreateLazyModeRepo();
             return repo.Update(model);
         }
 
         public int Delete(Expression<Func<ModelSticker, bool>> predicate)
         {
-            var repo = _repositoryFactory.CreateSingletonModeRepo();
+            var repo = _repositorySticker.CreateLazyModeRepo();
             return repo.Delete(predicate);
         }
     }

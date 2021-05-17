@@ -92,7 +92,7 @@ namespace StickersOnMap.WEB
                 options.EnableSensitiveDataLogging();
             });
 
-            services.AddScoped<IStickerRepoFacade, StickerRepoFacade>();
+            services.AddScoped<IStickerRepo, StickerRepo>();
         }
         
         private void ConfigLogging(IServiceCollection services)

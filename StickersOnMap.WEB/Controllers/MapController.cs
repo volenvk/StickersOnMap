@@ -24,12 +24,12 @@ namespace StickersOnMap.WEB.Controllers
     public class MapController : ControllerBase
     {
         private readonly ILogger<MapController> _logger;
-        private readonly IStickerRepoFacade _stickerRepoFacade;
+        private readonly IStickerRepo _stickerRepoFacade;
         private readonly IMapper _mapper;
 
 
         /// <inheritdoc />
-        public MapController(IStickerRepoFacade stickerRepoFacade, IMapper mapper, ILogger<MapController> logger)
+        public MapController(IStickerRepo stickerRepoFacade, IMapper mapper, ILogger<MapController> logger)
         {
             _stickerRepoFacade = stickerRepoFacade ?? throw new ArgumentNullException(nameof(stickerRepoFacade));
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));

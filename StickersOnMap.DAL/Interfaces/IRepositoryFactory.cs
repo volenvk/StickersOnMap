@@ -4,8 +4,8 @@ namespace StickersOnMap.DAL.Interfaces
 
     public interface IRepositoryFactory<T> where T : class, IEntity
     {
-        IStateRepository<T> CreateSingletonStateRepo();
-        IModeRepository<T> CreateSingletonModeRepo();
-        IFilterRepositoryByMap<T> CreateSingletonFilterRepo();
+        IStateRepository<T> CreateLazyStateRepo();
+        IModeRepository<T> CreateLazyModeRepo();
+        IFilterRepositoryByMap<T> CreateLazyFilterRepo();
     }
 }

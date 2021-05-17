@@ -12,20 +12,21 @@ namespace StickersOnMap.DAL.Repositories
     public class StateRepository<T> : IStateRepository<T> where T : class, IEntity
     {
         private readonly ILogger _logger;
-        private readonly IUnitOfWork _uow; 
+        private readonly Func<IRepository<T>> _repository; 
 
         public StateRepository(IRepositoryConfig config)
         {
             _ = config ?? throw new ArgumentNullException(nameof(config));
             _logger = LogManager.GetCurrentClassLogger();
-            _uow = config.CreateSingletonUnitOfWork();
+            _repository = config.GetRepository<T>();
         }
 
         public T GetFirstOrDefault(Expression<Func<T, bool>> predicate)
         {
             try
             {
-                return _uow.GetQueryable<T>().FirstOrDefault(predicate);
+                using var repo = _repository();
+                return repo.GetQueryable().FirstOrDefault(predicate);
             }
             catch (Exception ex)
             {
@@ -40,7 +41,8 @@ namespace StickersOnMap.DAL.Repositories
         {
             try
             {
-                return _uow.GetQueryable<T>().Where(predicate).ToList();
+                using var repo = _repository();
+                return repo.GetQueryable().Where(predicate).ToList();
             }
             catch (Exception ex)
             {
@@ -55,7 +57,8 @@ namespace StickersOnMap.DAL.Repositories
         {
             try
             {
-                return predicate == null ? _uow.GetQueryable<T>().Any() : _uow.GetQueryable<T>().Any(predicate);
+                using var repo = _repository();
+                return predicate == null ? repo.GetQueryable().Any() : repo.GetQueryable().Any(predicate);
             }
             catch (Exception ex)
             {

@@ -15,7 +15,7 @@ namespace StickersOnMap.DAL.Repositories
 
     public class FilterRepositoryByMap<T> : IFilterRepositoryByMap<T> where T : class, IEntity
     {
-        private readonly IUnitOfWork _uow;
+        private readonly Func<IRepository<T>> _repository;
         private readonly IMapper _mapper;
         private readonly ILogger _logger;
 
@@ -24,14 +24,15 @@ namespace StickersOnMap.DAL.Repositories
             _ = config ?? throw new ArgumentNullException(nameof(config));
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
             _logger = LogManager.GetCurrentClassLogger();
-            _uow = config.CreateSingletonUnitOfWork();
+            _repository = config.GetRepository<T>();
         }
         
         public IEnumerable<TD> FilterBy<TD>(TableFilter filter) where TD : class, new()
         {
             try
             {
-                return _uow.GetQueryable<T>().FilterBy(filter.Filters)
+                using var repo = _repository();
+                return repo.GetQueryable().FilterBy(filter.Filters)
                     .OrderByEntity(string.IsNullOrEmpty(filter.Sort?.Property) ? null : filter.Sort)
                     .ProjectTo<TD>(_mapper.ConfigurationProvider)
                     .ToList();
@@ -49,9 +50,10 @@ namespace StickersOnMap.DAL.Repositories
         {
             try
             {
-                var count = _uow.GetQueryable<T>().FilterBy(filter.Filters).Count();
+                using var repo = _repository();
+                var count = repo.GetQueryable().FilterBy(filter.Filters).Count();
                 
-                return _uow.GetQueryable<T>().FilterBy(filter.Filters)
+                return repo.GetQueryable().FilterBy(filter.Filters)
                     .OrderByEntity(string.IsNullOrEmpty(filter.Sort?.Property) ? null : filter.Sort)
                     .TakePage(filter.Page?.PageSize == 0 ? null : filter.Page)
                     .ProjectTo<TD>(_mapper.ConfigurationProvider)

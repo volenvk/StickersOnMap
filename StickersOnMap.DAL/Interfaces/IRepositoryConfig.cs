@@ -1,7 +1,9 @@
 namespace StickersOnMap.DAL.Interfaces
 {
+    using System;
+
     public interface IRepositoryConfig
     {
-        IUnitOfWork CreateSingletonUnitOfWork();
+        Func<IRepository<T>> GetRepository<T>() where T : class;
     }
 }

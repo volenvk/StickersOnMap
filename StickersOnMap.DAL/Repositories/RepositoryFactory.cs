@@ -8,9 +8,9 @@ namespace StickersOnMap.DAL.Repositories
     
     public sealed class RepositoryFactory<T> : IRepositoryFactory<T> where T : class, IEntity
     {
-        private static Lazy<IStateRepository<T>> _stateRepoInstance;
-        private static Lazy<IModeRepository<T>> _modeRepoInstance;
-        private static Lazy<IFilterRepositoryByMap<T>> _filterRepoInstance;
+        private readonly Lazy<IStateRepository<T>> _stateRepoInstance;
+        private readonly Lazy<IModeRepository<T>> _modeRepoInstance;
+        private readonly Lazy<IFilterRepositoryByMap<T>> _filterRepoInstance;
 
         public RepositoryFactory(IRepositoryConfig config, IMapper mapper)
         {
@@ -22,10 +22,10 @@ namespace StickersOnMap.DAL.Repositories
             _filterRepoInstance = new Lazy<IFilterRepositoryByMap<T>>(()=> new FilterRepositoryByMap<T>(config, mapper));
         }
 
-        public IStateRepository<T> CreateSingletonStateRepo() => _stateRepoInstance.Value;
+        public IStateRepository<T> CreateLazyStateRepo() => _stateRepoInstance.Value;
         
-        public IModeRepository<T> CreateSingletonModeRepo() => _modeRepoInstance.Value;
+        public IModeRepository<T> CreateLazyModeRepo() => _modeRepoInstance.Value;
         
-        public IFilterRepositoryByMap<T> CreateSingletonFilterRepo() => _filterRepoInstance.Value;
+        public IFilterRepositoryByMap<T> CreateLazyFilterRepo() => _filterRepoInstance.Value;
     }
 }

@@ -12,13 +12,13 @@ namespace StickersOnMap.DAL.Repositories
     public class ModeRepository<T> : IModeRepository<T> where T : class, IEntity
     {
         private readonly ILogger _logger;
-        private readonly IUnitOfWork _uow;
+        private readonly Func<IRepository<T>> _repository;
 
         public ModeRepository(IRepositoryConfig config)
         {
             _ = config ?? throw new ArgumentNullException(nameof(config));
             _logger = LogManager.GetCurrentClassLogger();
-            _uow = config.CreateSingletonUnitOfWork();
+            _repository = config.GetRepository<T>();
         }
         
         public int Add(T model)
@@ -28,9 +28,10 @@ namespace StickersOnMap.DAL.Repositories
 
             try
             {
+                using var repo = _repository();
                 model.CreateDate = DateTime.Now;
-                _uow.Insert(model);
-                return _uow.Save();
+                repo.Insert(model);
+                return repo.Save();
             }
             catch (Exception ex)
             {
@@ -46,13 +47,14 @@ namespace StickersOnMap.DAL.Repositories
 
             try
             {
+                using var repo = _repository();
                 foreach (var model in source)
                 {
                     model.CreateDate = DateTime.Now;
-                    _uow.Insert(model);
+                    repo.Insert(model);
                 }
 
-                return _uow.Save();
+                return repo.Save();
             }
             catch (Exception ex)
             {
@@ -68,12 +70,13 @@ namespace StickersOnMap.DAL.Repositories
 
             try
             {
-                if (!_uow.GetQueryable<T>().Any(dt => dt.Id == model.Id)) 
+                using var repo = _repository();
+                if (!repo.GetQueryable().Any(dt => dt.Id == model.Id)) 
                     return 0;
                 
                 model.CreateDate = DateTime.Now;
-                _uow.Update(model);
-                return _uow.Save();
+                repo.Update(model);
+                return repo.Save();
             }
             catch (Exception ex)
             {
@@ -86,12 +89,13 @@ namespace StickersOnMap.DAL.Repositories
         {
             try
             {
-                var model = _uow.GetQueryable<T>().FirstOrDefault(predicate);
+                using var repo = _repository();
+                var model = repo.GetQueryable().FirstOrDefault(predicate);
                 if (model == null)
                     throw new ArgumentNullException(nameof(model));
                 
-                _uow.Delete(model);
-                return _uow.Save();
+                repo.Delete(model);
+                return repo.Save();
             }
             catch (Exception ex)
             {

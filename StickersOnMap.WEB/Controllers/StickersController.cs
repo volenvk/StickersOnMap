@@ -21,11 +21,11 @@ namespace StickersOnMap.WEB.Controllers
     [Route("api/[controller]")]
     public class StickersController : ControllerBase
     {
-        private readonly IStickerRepoFacade _stickerRepoFacade;
+        private readonly IStickerRepo _stickerRepoFacade;
         private readonly ILogger<StickersController> _logger;
 
         /// <inheritdoc />
-        public StickersController(IStickerRepoFacade stickerRepoFacade, ILogger<StickersController> logger)
+        public StickersController(IStickerRepo stickerRepoFacade, ILogger<StickersController> logger)
         {
             _stickerRepoFacade = stickerRepoFacade ?? throw new ArgumentNullException(nameof(stickerRepoFacade));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
