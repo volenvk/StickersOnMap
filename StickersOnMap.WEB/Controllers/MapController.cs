@@ -24,14 +24,14 @@ namespace StickersOnMap.WEB.Controllers
     public class MapController : ControllerBase
     {
         private readonly ILogger<MapController> _logger;
-        private readonly IStickerRepo _stickerRepoFacade;
+        private readonly IStickerRepo _stickerRepo;
         private readonly IMapper _mapper;
 
 
         /// <inheritdoc />
-        public MapController(IStickerRepo stickerRepoFacade, IMapper mapper, ILogger<MapController> logger)
+        public MapController(IStickerRepo stickerRepo, IMapper mapper, ILogger<MapController> logger)
         {
-            _stickerRepoFacade = stickerRepoFacade ?? throw new ArgumentNullException(nameof(stickerRepoFacade));
+            _stickerRepo = stickerRepo ?? throw new ArgumentNullException(nameof(stickerRepo));
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
@@ -47,7 +47,7 @@ namespace StickersOnMap.WEB.Controllers
         {
             try
             {
-                var activeGeoDatas = _stickerRepoFacade.Where(s=>s.Active)?.ToList();
+                var activeGeoDatas = _stickerRepo.Where(s=>s.Active)?.ToList();
                 IEnumerable<GeoDataDTO> geoDataDtos = new GeoDataDTO[0];
                 if (activeGeoDatas != null)
                 {
@@ -61,7 +61,7 @@ namespace StickersOnMap.WEB.Controllers
                 _logger.LogError(ex, "Не удалось получить данные.");
             }
             
-            return ErrorResult.NotFound("Ошибка: данные не найдены.");
+            return ErrorResult.NotFound("Ошибка: не удалось получить данные.");
         }
         
         /// <summary>
@@ -82,14 +82,14 @@ namespace StickersOnMap.WEB.Controllers
                 {
                     if (dto != null)
                     {
-                        if (_stickerRepoFacade.Any(m => m.Name.Equals(dto.Name, StringComparison.CurrentCultureIgnoreCase)))
+                        if (_stickerRepo.Any(m => m.Name.Equals(dto.Name, StringComparison.CurrentCultureIgnoreCase)))
                         {
                             return ErrorResult.Conflict($"Ошибка: {dto.Name} было добавлено ранее.");
                         }
                     
                         var model = _mapper.Map<ModelSticker>(dto);
 
-                        if (_stickerRepoFacade.Add(model) > 0)
+                        if (_stickerRepo.Add(model) > 0)
                         {
                             _logger.LogInformation($"Создание {typeof(GeoDataDTO).Name}: [{ToJsonString(dto)}]");
 
