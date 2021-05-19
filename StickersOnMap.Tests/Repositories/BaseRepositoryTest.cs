@@ -9,7 +9,7 @@ namespace StickersOnMap.Tests.Repositories
     using NUnit.Framework;
     using WEB.Infrastructure.MappingProfiles;
 
-    public abstract class BaseRepositoryTest
+    internal abstract class BaseRepositoryTest
     {
         protected DataSet CommonTestDataSet;
         private Fixture _fixture;

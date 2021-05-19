@@ -7,7 +7,7 @@ namespace StickersOnMap.Tests.Controllers
     using NUnit.Framework;
     using WEB.Infrastructure.MappingProfiles;
 
-    public abstract class BaseControllerTest
+    internal abstract class BaseControllerTest
     {
         private Fixture _fixture;
         private static readonly Lazy<MapperConfiguration> _mapperConfiguration =

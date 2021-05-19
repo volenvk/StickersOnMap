@@ -10,7 +10,7 @@ namespace StickersOnMap.Tests.Repositories
     using NUnit.Framework;
 
     [TestFixture]
-    public class StickerRepoTests : BaseRepositoryTest
+    internal class StickerRepoTests : BaseRepositoryTest
     {
         private IStickerRepo _stickerRepo;
         private FakeStickersDb<ModelSticker> _stickerDb;
@@ -27,7 +27,8 @@ namespace StickersOnMap.Tests.Repositories
         public void StickerRepoGetFirstOrDefaultTest()
         {
             // Arrange
-            var name = new Guid().ToString();
+            CommonTestDataSet = new DataSet(count: 10);
+            var name = CommonTestDataSet.RandomName;
             var stickers = CreateCollectionWithModifyElements<ModelSticker>(m =>
             {
                 m.Active = false;
@@ -51,7 +52,8 @@ namespace StickersOnMap.Tests.Repositories
         public void StickerRepoAddTest()
         {
             // Arrange
-            var name = new Guid().ToString();
+            CommonTestDataSet = new DataSet(count: 10);
+            var name = CommonTestDataSet.RandomName;
             var stickers = CreateCollectionWithModifyElements<ModelSticker>(m =>
             {
                 m.Active = false;
@@ -81,7 +83,8 @@ namespace StickersOnMap.Tests.Repositories
         public void StickerRepoUpdateTest()
         {
             // Arrange
-            var name = new Guid().ToString();
+            CommonTestDataSet = new DataSet(count: 10);
+            var name = CommonTestDataSet.RandomName;
             var stickers = CreateCollectionWithModifyElements<ModelSticker>(m =>
             {
                 m.Active = false;
@@ -114,7 +117,8 @@ namespace StickersOnMap.Tests.Repositories
         public void StickerRepoDeleteTest()
         {
             // Arrange
-            var name = new Guid().ToString();
+            CommonTestDataSet = new DataSet(count: 10);
+            var name = CommonTestDataSet.RandomName;
             var stickers = CreateCollectionWithModifyElements<ModelSticker>(m =>
             {
                 m.Active = false;

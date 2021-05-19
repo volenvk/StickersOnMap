@@ -11,7 +11,7 @@ namespace StickersOnMap.Tests.Controllers
     using WEB.Models;
 
     [TestFixture]
-    public class SettingsControllerTests : BaseControllerTest
+    internal class SettingsControllerTests : BaseControllerTest
     {
         private class TestableController : SettingsController
         { 

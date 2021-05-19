@@ -16,7 +16,7 @@ namespace StickersOnMap.Tests.Controllers
     using WEB.Controllers;
     using WEB.Models;
 
-    public class MapControllerTests : BaseControllerTest
+    internal class MapControllerTests : BaseControllerTest
     {
         private class TestableController : MapController
         {
