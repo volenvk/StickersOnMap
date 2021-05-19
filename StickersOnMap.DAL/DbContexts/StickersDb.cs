@@ -4,7 +4,7 @@ namespace StickersOnMap.DAL.DbContexts
 {
     using Models;
     
-    public class StickersDb : DbContext
+    public class StickersDb : DbContext, IStickersDb
     {
         public StickersDb(DbContextOptions<StickersDb> options) : base(options) { }
         

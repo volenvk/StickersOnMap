@@ -15,7 +15,7 @@ namespace StickersOnMap.DAL.Repositories
     {
         private readonly IRepositoryFactory<ModelSticker> _repositorySticker;
         
-        public StickerRepo(StickersDb context, IMapper mapper)
+        public StickerRepo(IStickersDb context, IMapper mapper)
         {
             _ = context ?? throw new ArgumentNullException(nameof(context));
             _ = mapper ?? throw new ArgumentNullException(nameof(mapper));

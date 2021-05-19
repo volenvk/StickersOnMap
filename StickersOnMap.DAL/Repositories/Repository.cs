@@ -2,14 +2,14 @@ namespace StickersOnMap.DAL.Repositories
 {
     using System;
     using System.Linq;
-    using Microsoft.EntityFrameworkCore;
+    using DbContexts;
     using Interfaces;
 
-    public class Repository<T> : IRepository<T> where T : class
+    internal class Repository<T> : IRepository<T> where T : class
     {
-        private readonly DbContext _context;
+        private readonly IDbContext _context;
 
-        public Repository(DbContext context)
+        public Repository(IDbContext context)
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
         }
